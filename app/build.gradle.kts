@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     id("kotlin-kapt")
+    id("io.realm.kotlin")
 //    id("com.google.dagger.hilt.android")
 }
 
@@ -74,6 +75,7 @@ dependencies {
 
 //    viewmodel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
+    implementation("io.realm.kotlin:library-base:1.11.0")
 
 }

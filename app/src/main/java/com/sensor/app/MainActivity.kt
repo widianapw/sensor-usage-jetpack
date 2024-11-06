@@ -14,6 +14,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.sensor.app.presentation.history.HistoryRoute
+import com.sensor.app.presentation.history.HistoryScreen
 import com.sensor.app.presentation.main.MainRoute
 import com.sensor.app.presentation.main.MainScreen
 import com.sensor.app.presentation.record.RecordRoute
@@ -41,6 +43,12 @@ class MainActivity : ComponentActivity() {
 
                     composable<RecordRoute> {
                         RecordScreen(
+                            navController = navController
+                        )
+                    }
+
+                    composable<HistoryRoute> {
+                        HistoryScreen(
                             navController = navController
                         )
                     }

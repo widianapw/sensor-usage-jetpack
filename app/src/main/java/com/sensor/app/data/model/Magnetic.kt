@@ -1,6 +1,6 @@
 package com.sensor.app.data.model
 
-data class GyroscopeListItem(
+data class MagneticListItem(
     val x: Float = 0f,
     val y: Float = 0f,
     val z: Float = 0f,
@@ -15,4 +15,3 @@ data class GyroscopeListItem(
     }
 
 }
-

@@ -18,63 +18,85 @@ class MainViewModel(
     private val sensorManager: SensorManager =
         getSystemService(context, SensorManager::class.java) as SensorManager
 
+    private val accelerometerReading = FloatArray(3)
+    private val magnetometerReading = FloatArray(3)
+
     init {
-        val lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-        lightSensor?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
-        }
+        val sensors = listOf(
+            Sensor.TYPE_LIGHT,
+            Sensor.TYPE_ACCELEROMETER,
+            Sensor.TYPE_GYROSCOPE,
+            Sensor.TYPE_STEP_COUNTER,
+            Sensor.TYPE_MAGNETIC_FIELD
+        )
 
-        val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        accelerometerSensor?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
-        }
-
-        val gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
-        gyroscopeSensor?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
-        }
-
-        val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        stepCounterSensor?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_FASTEST)
-        }
-    }
-
-    override fun onSensorChanged(p0: SensorEvent?) {
-        when (p0?.sensor?.type) {
-            Sensor.TYPE_LIGHT -> {
-                val light = p0.values[0]
-                _state.value = _state.value.copy(light = light)
-            }
-            Sensor.TYPE_ACCELEROMETER -> {
-                val x = p0.values[0]
-                val y = p0.values[1]
-                val z = p0.values[2]
-                _state.value = _state.value.copy(
-                    accelerometerX = x,
-                    accelerometerY = y,
-                    accelerometerZ = z
-                )
-            }
-            Sensor.TYPE_GYROSCOPE -> {
-                val x = p0.values[0]
-                val y = p0.values[1]
-                val z = p0.values[2]
-                _state.value = _state.value.copy(
-                    gyroscopeX = x,
-                    gyroscopeY = y,
-                    gyroscopeZ = z
-                )
-            }
-            Sensor.TYPE_STEP_COUNTER -> {
-                val steps = p0.values[0]
-                _state.value = _state.value.copy(stepCounter = steps)
-//                _state.value = _state.value.copy(stepCounter = _state.value.stepCounter + 1)
+        sensors.forEach { sensorType ->
+            sensorManager.getDefaultSensor(sensorType)?.let { sensor ->
+                val delay = if (sensorType == Sensor.TYPE_STEP_COUNTER) {
+                    SensorManager.SENSOR_DELAY_FASTEST
+                } else {
+                    SensorManager.SENSOR_DELAY_NORMAL
+                }
+                sensorManager.registerListener(this, sensor, delay)
             }
         }
     }
 
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+    override fun onSensorChanged(event: SensorEvent?) {
+        event?.let { p0 ->
+            when (p0.sensor.type) {
+                Sensor.TYPE_LIGHT -> {
+                    val light = p0.values[0]
+                    _state.value = _state.value.copy(light = light)
+                }
+                Sensor.TYPE_ACCELEROMETER -> {
+                    System.arraycopy(p0.values, 0, accelerometerReading, 0, accelerometerReading.size)
+                    _state.value = _state.value.copy(
+                        accelerometerX = p0.values[0],
+                        accelerometerY = p0.values[1],
+                        accelerometerZ = p0.values[2]
+                    )
+                }
+                Sensor.TYPE_GYROSCOPE -> {
+                    _state.value = _state.value.copy(
+                        gyroscopeX = p0.values[0],
+                        gyroscopeY = p0.values[1],
+                        gyroscopeZ = p0.values[2]
+                    )
+                }
+                Sensor.TYPE_STEP_COUNTER -> {
+                    val steps = p0.values[0]
+                    _state.value = _state.value.copy(stepCounter = steps)
+                }
+                Sensor.TYPE_MAGNETIC_FIELD -> {
+                    System.arraycopy(p0.values, 0, magnetometerReading, 0, magnetometerReading.size)
+                    _state.value = _state.value.copy(
+                        magneticX = p0.values[0],
+                        magneticY = p0.values[1],
+                        magneticZ = p0.values[2]
+                    )
+                }
+            }
+
+            // Compute the azimuth angle
+            val rotationMatrix = FloatArray(9)
+            val success = SensorManager.getRotationMatrix(
+                rotationMatrix,
+                null,
+                accelerometerReading,
+                magnetometerReading
+            )
+            if (success) {
+                val orientationAngles = FloatArray(3)
+                SensorManager.getOrientation(rotationMatrix, orientationAngles)
+                val azimuth = Math.toDegrees(orientationAngles[0].toDouble()).toFloat()
+                _state.value = _state.value.copy(azimuth = azimuth)
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // You can handle sensor accuracy changes if needed
     }
 
     override fun onCleared() {
