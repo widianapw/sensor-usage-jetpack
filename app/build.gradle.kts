@@ -77,5 +77,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
     implementation("io.realm.kotlin:library-base:1.11.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
 
 }

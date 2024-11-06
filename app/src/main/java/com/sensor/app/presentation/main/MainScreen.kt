@@ -1,5 +1,6 @@
 package com.sensor.app.presentation.main
 
+import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,12 +27,19 @@ import com.sensor.app.presentation.record.RecordRoute
 import kotlinx.serialization.Serializable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.LaunchedEffect
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.sensor.app.presentation.history.HistoryRoute
 
 
 @Serializable
 object MainRoute
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = viewModel(),
@@ -40,6 +48,30 @@ fun MainScreen(
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
+    val requiredPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        android.Manifest.permission.ACTIVITY_RECOGNITION
+    } else {
+        android.Manifest.permission.BODY_SENSORS
+    }
+
+    val permissionState = rememberPermissionState(permission = requiredPermission)
+
+// Handle permission request and result
+    LaunchedEffect(permissionState.status) {
+        when (permissionState.status) {
+            is PermissionStatus.Granted -> {
+                // Permission granted, proceed accordingly
+                viewModel.initStepCounter()
+            }
+            else -> {
+                // Permission denied, you can show rationale or request again
+                // For initial launch, request the permission
+                if (!permissionState.status.shouldShowRationale) {
+                    permissionState.launchPermissionRequest()
+                }
+            }
+        }
+    }
     Scaffold { padding ->
         Column(
             modifier = Modifier
