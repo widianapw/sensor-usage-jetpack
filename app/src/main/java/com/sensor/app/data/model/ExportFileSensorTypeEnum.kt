@@ -5,5 +5,6 @@ enum class ExportFileSensorTypeEnum(val type: String? = null) {
     GYROSCOPE("Gyroscope"),
     LIGHT("Light"),
     STEP_COUNTER("StepCounter"),
-    MAGNETIC("Magnetic")
+    MAGNETIC("Magnetic"),
+    LOCATION("Location"),
 }

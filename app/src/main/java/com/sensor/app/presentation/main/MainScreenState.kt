@@ -13,4 +13,6 @@ data class MainScreenState(
     val magneticY: Float = 0f,
     val magneticZ: Float = 0f,
     val azimuth: Float = 0f,
+    val latitude: Float = 0f,
+    val longitude: Float = 0f
 )

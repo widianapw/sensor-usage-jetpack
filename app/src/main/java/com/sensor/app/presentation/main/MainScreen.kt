@@ -1,6 +1,10 @@
 package com.sensor.app.presentation.main
 
+import android.Manifest
 import android.os.Build
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,30 +52,36 @@ fun MainScreen(
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    val requiredPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        android.Manifest.permission.ACTIVITY_RECOGNITION
+    val BODY_PERMISSION = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        Manifest.permission.ACTIVITY_RECOGNITION
     } else {
-        android.Manifest.permission.BODY_SENSORS
+        Manifest.permission.BODY_SENSORS
     }
 
-    val permissionState = rememberPermissionState(permission = requiredPermission)
+    val permissionToRequest = arrayOf(
+        BODY_PERMISSION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        )
 
-// Handle permission request and result
-    LaunchedEffect(permissionState.status) {
-        when (permissionState.status) {
-            is PermissionStatus.Granted -> {
-                // Permission granted, proceed accordingly
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            Log.d("MAINSCREEN", "MainScreen: permissions: $permissions")
+            if (permissions.all { it.value }) {
+                Log.d("MAINSCREEN", "MainScreen: All permissions granted")
                 viewModel.initStepCounter()
-            }
-            else -> {
-                // Permission denied, you can show rationale or request again
-                // For initial launch, request the permission
-                if (!permissionState.status.shouldShowRationale) {
-                    permissionState.launchPermissionRequest()
-                }
+                viewModel.initLocationTracker()
             }
         }
+    )
+
+
+// Handle permission request and result
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(permissionToRequest)
     }
+
     Scaffold { padding ->
         Column(
             modifier = Modifier
@@ -107,6 +117,11 @@ fun MainScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                SensorDataCard(
+                    title = "Location",
+                    content = "Lat: ${state.latitude}\nLong: ${state.longitude}",
+                    icon = Icons.Default.LocationOn
+                )
                 SensorDataCard(
                     title = "Light",
                     content = "${state.light} lux",

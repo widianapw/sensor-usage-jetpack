@@ -15,5 +15,7 @@ data class RecordScreenState(
     val magneticX: Float = 0f,
     val magneticY: Float = 0f,
     val magneticZ: Float = 0f,
+    val latitude: Float = 0f,
+    val longitude: Float = 0f,
     val title: String = ""
 )

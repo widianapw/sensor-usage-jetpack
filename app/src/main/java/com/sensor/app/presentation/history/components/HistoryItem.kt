@@ -60,6 +60,7 @@ fun HistoryItem(history: History, onDeleteItemClicked: (History) -> Unit) {
             SensorFileItem("Magnetic Field Data", history.magneticPath, context)
             SensorFileItem("Light Data", history.lightPath, context)
             SensorFileItem("Step Counter Data", history.stepCounterPath, context)
+            SensorFileItem("Location Data", history.locationPath, context)
 
             Spacer(modifier = Modifier.height(8.dp))
             Button(

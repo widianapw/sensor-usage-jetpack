@@ -123,6 +123,11 @@ fun RecordScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 SensorDataCard(
+                    title = "Location",
+                    content = "Lat: ${state.latitude}\nLong: ${state.longitude}",
+                    icon = Icons.Default.LocationOn
+                )
+                SensorDataCard(
                     title = "Light",
                     content = "${state.light} lux",
                     icon = Icons.Default.WbSunny

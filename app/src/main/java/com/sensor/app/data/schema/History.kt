@@ -12,5 +12,6 @@ class History: RealmObject {
     var magneticPath: String = ""
     var lightPath: String = ""
     var stepCounterPath: String = ""
+    var locationPath: String = ""
     var timestamp: Long = 0
 }
