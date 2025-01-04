@@ -72,7 +72,7 @@ class MainViewModel(
 
     fun initLocationTracker() {
         // Start location tracking
-// Check if location permissions are granted
+        // Check if location permissions are granted
         val fineLocationGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
